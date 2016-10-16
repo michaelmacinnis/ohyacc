@@ -1,2 +1,1 @@
-# ohyacc
-Version of goyacc with small modifications
+Version of goyacc with small modifications. May change without warning.
