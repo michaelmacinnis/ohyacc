@@ -3314,6 +3314,7 @@ var (
 type $$Lexer interface {
 	Lex(lval *$$SymType) int
 	Error(s string)
+	Restart(int) bool
 }
 
 type $$Parser interface {
@@ -3465,6 +3466,11 @@ func ($$rcvr *$$ParserImpl) Parse($$lex $$Lexer) int {
 	_ = $$Dollar // silence set and not used
 	$$S := $$rcvr.stack[:]
 
+	zero$$VAL := $$VAL
+
+$$start:
+	$$VAL = zero$$VAL
+
 	Nerrs := 0   /* number of errors */
 	Errflag := 0 /* error recovery flag */
 	$$state := 0
@@ -3507,6 +3513,9 @@ $$newstate:
 	}
 	if $$rcvr.char < 0 {
 		$$rcvr.char, $$token = $$lex1($$lex, &$$rcvr.lval)
+		if $$lex.Restart($$rcvr.char) {
+			goto $$start
+		}
 	}
 	$$n += $$token
 	if $$n < 0 || $$n >= $$Last {
@@ -3530,6 +3539,9 @@ $$default:
 	if $$n == -2 {
 		if $$rcvr.char < 0 {
 			$$rcvr.char, $$token = $$lex1($$lex, &$$rcvr.lval)
+			if $$lex.Restart($$rcvr.char) {
+				goto $$start
+			}
 		}
 
 		/* look through exception table */
