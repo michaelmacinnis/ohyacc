@@ -3312,20 +3312,20 @@ var (
 )
 
 type $$Lexer interface {
-	Lex(lval *$$SymType) int
 	Error(s string)
-	Restart(int) bool
+	Lex() *$$SymType
+	Restart(*$$SymType) bool
 }
 
 type $$Parser interface {
-	Parse($$Lexer) int
 	Lookahead() int
+	Parse($$Lexer) int
 }
 
 type $$ParserImpl struct {
-	lval  $$SymType
-	stack [$$InitialStackSize]$$SymType
 	char  int
+	lval  *$$SymType
+	stack [$$InitialStackSize]$$SymType
 }
 
 func (p *$$ParserImpl) Lookahead() int {
@@ -3420,9 +3420,11 @@ func $$ErrorMessage(state, lookAhead int) string {
 	return res
 }
 
-func $$lex1(lex $$Lexer, lval *$$SymType) (char, token int) {
+func $$lex1(lex $$Lexer) (lval *$$SymType, char, token int) {
 	token = 0
-	char = lex.Lex(lval)
+	lval = lex.Lex()
+
+	char = lval.yys
 	if char <= 0 {
 		token = $$Tok1[0]
 		goto out
@@ -3452,7 +3454,7 @@ out:
 	if $$Debug >= 3 {
 		__yyfmt__.Printf("lex %s(%d)\n", $$Tokname(token), uint(char))
 	}
-	return char, token
+	return lval, char, token
 }
 
 func $$Parse($$lex $$Lexer) int {
@@ -3512,8 +3514,8 @@ $$newstate:
 		goto $$default /* simple state */
 	}
 	if $$rcvr.char < 0 {
-		$$rcvr.char, $$token = $$lex1($$lex, &$$rcvr.lval)
-		if $$lex.Restart($$rcvr.char) {
+		$$rcvr.lval, $$rcvr.char, $$token = $$lex1($$lex)
+		if $$lex.Restart($$rcvr.lval) {
 			goto $$start
 		}
 	}
@@ -3525,7 +3527,7 @@ $$newstate:
 	if $$Chk[$$n] == $$token { /* valid shift */
 		$$rcvr.char = -1
 		$$token = -1
-		$$VAL = $$rcvr.lval
+		$$VAL = *$$rcvr.lval
 		$$state = $$n
 		if Errflag > 0 {
 			Errflag--
@@ -3538,8 +3540,8 @@ $$default:
 	$$n = $$Def[$$state]
 	if $$n == -2 {
 		if $$rcvr.char < 0 {
-			$$rcvr.char, $$token = $$lex1($$lex, &$$rcvr.lval)
-			if $$lex.Restart($$rcvr.char) {
+			$$rcvr.lval, $$rcvr.char, $$token = $$lex1($$lex)
+			if $$lex.Restart($$rcvr.lval) {
 				goto $$start
 			}
 		}
