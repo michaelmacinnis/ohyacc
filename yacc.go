@@ -3424,6 +3424,10 @@ func $$lex1(lex $$Lexer) (lval *$$SymType, char, token int) {
 	token = 0
 	lval = lex.Lex()
 
+	if lval == nil {
+		return nil, 0, 0
+	}
+
 	char = lval.yys
 	if char <= 0 {
 		token = $$Tok1[0]
@@ -3515,6 +3519,9 @@ $$newstate:
 	}
 	if $$rcvr.char < 0 {
 		$$rcvr.lval, $$rcvr.char, $$token = $$lex1($$lex)
+		if $$rcvr.lval == nil {
+			goto ret0
+		}
 		if $$lex.Restart($$rcvr.lval) {
 			goto $$start
 		}
@@ -3541,6 +3548,9 @@ $$default:
 	if $$n == -2 {
 		if $$rcvr.char < 0 {
 			$$rcvr.lval, $$rcvr.char, $$token = $$lex1($$lex)
+			if $$rcvr.lval == nil {
+				goto ret0
+			}
 			if $$lex.Restart($$rcvr.lval) {
 				goto $$start
 			}
