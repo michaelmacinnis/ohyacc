@@ -3313,8 +3313,8 @@ var (
 
 type $$Lexer interface {
 	Error(s string)
+	Fatal(*$$SymType) bool
 	Lex() *$$SymType
-	Restart(*$$SymType) bool
 }
 
 type $$Parser interface {
@@ -3475,6 +3475,7 @@ func ($$rcvr *$$ParserImpl) Parse($$lex $$Lexer) int {
 	zero$$VAL := $$VAL
 
 $$start:
+	$$n = 0
 	$$VAL = zero$$VAL
 
 	Nerrs := 0   /* number of errors */
@@ -3522,8 +3523,8 @@ $$newstate:
 		if $$rcvr.lval == nil {
 			goto ret0
 		}
-		if $$lex.Restart($$rcvr.lval) {
-			goto $$start
+		if $$lex.Fatal($$rcvr.lval) {
+			goto ret1
 		}
 	}
 	$$n += $$token
@@ -3551,8 +3552,8 @@ $$default:
 			if $$rcvr.lval == nil {
 				goto ret0
 			}
-			if $$lex.Restart($$rcvr.lval) {
-				goto $$start
+			if $$lex.Fatal($$rcvr.lval) {
+				goto ret1
 			}
 		}
 
@@ -3580,6 +3581,7 @@ $$default:
 		switch Errflag {
 		case 0: /* brand new error */
 			$$lex.Error($$ErrorMessage($$state, $$token))
+			goto ret1
 			Nerrs++
 			if $$Debug >= 1 {
 				__yyfmt__.Printf("%s", $$Statname($$state))
