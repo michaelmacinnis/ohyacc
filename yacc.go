@@ -3312,7 +3312,7 @@ var (
 )
 
 type $$Lexer interface {
-	Error(s string)
+	Error(s string) bool
 	Fatal(*$$SymType) bool
 	Lex() *$$SymType
 }
@@ -3580,8 +3580,9 @@ $$default:
 		/* error ... attempt to resume parsing */
 		switch Errflag {
 		case 0: /* brand new error */
-			$$lex.Error($$ErrorMessage($$state, $$token))
-			goto ret1
+			if $$lex.Error($$ErrorMessage($$state, $$token)) {
+				goto ret1
+			}
 			Nerrs++
 			if $$Debug >= 1 {
 				__yyfmt__.Printf("%s", $$Statname($$state))
