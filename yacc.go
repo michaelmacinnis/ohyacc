@@ -3325,6 +3325,8 @@ type $$Parser interface {
 type $$ParserImpl struct {
 	char  int
 	lval  *$$SymType
+	n     int
+	p     int
 	stack [$$InitialStackSize]$$SymType
 }
 
@@ -3659,6 +3661,9 @@ $$default:
 	}
 	// dummy call; replaced with literal code
 	$$run()
+
+	$$rcvr.n = $$n
+	$$rcvr.p = $$p
 	goto $$stack /* stack new state and value */
 }
 `
