@@ -60,9 +60,9 @@ import (
 // the following are adjustable
 // according to memory size
 const (
-	ACTSIZE  = 30000
-	NSTATES  = 2000
-	TEMPSIZE = 2000
+	ACTSIZE  = 120000
+	NSTATES  = 8000
+	TEMPSIZE = 8000
 
 	SYMINC   = 50  // increase for non-term or term
 	RULEINC  = 50  // increase for max rule length prodptr[i]
@@ -3234,10 +3234,6 @@ func ungetrune(f *bufio.Reader, c rune) {
 	peekrune = c
 }
 
-func write(f *bufio.Writer, b []byte, n int) int {
-	panic("write")
-}
-
 func open(s string) *bufio.Reader {
 	fi, err := os.Open(s)
 	if err != nil {
@@ -3312,7 +3308,7 @@ var (
 )
 
 type $$Lexer interface {
-	Error(s string) bool
+	Error(s string)
 	Fatal(*$$SymType) bool
 	Lex() *$$SymType
 }
@@ -3495,10 +3491,10 @@ $$start:
 	goto $$stack
 
 ret0:
-	return 0
+	return 0 /* Normal exit. */
 
 ret1:
-	return 1
+	return 1 /* Abnormal exit. */
 
 $$stack:
 	/* put a state and value onto the stack */
@@ -3582,9 +3578,7 @@ $$default:
 		/* error ... attempt to resume parsing */
 		switch Errflag {
 		case 0: /* brand new error */
-			if $$lex.Error($$ErrorMessage($$state, $$token)) {
-				goto ret1
-			}
+			$$lex.Error($$ErrorMessage($$state, $$token))
 			Nerrs++
 			if $$Debug >= 1 {
 				__yyfmt__.Printf("%s", $$Statname($$state))
