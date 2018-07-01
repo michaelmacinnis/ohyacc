@@ -3265,9 +3265,9 @@ var (
 )
 
 type $$Lexer interface {
+	Lex() *$$SymType
 	Error(s string)
 	Fatal(*$$SymType) bool
-	Lex() *$$SymType
 }
 
 type $$Parser interface {
